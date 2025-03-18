@@ -8,7 +8,7 @@ import time
 RED,GREEN,YELLOW,BLUE,PURPLE = "\033[31m","\033[32m","\033[33m","\033[34m","\033[35m"
 COLOR_CLS = "\033[0m"
 
-def colab_dependencies_setup(dependency_requirements : dict, log_output_dir= '/content/'):
+def auto_lib_setup(dependency_requirements : dict, log_output_dir= '/content/'):
   LOG_PATH = os.path.join(log_output_dir, 'setup_log.txt')
   RESET_FLAG = False
   LOGS = []
@@ -49,7 +49,7 @@ def colab_dependencies_setup(dependency_requirements : dict, log_output_dir= '/c
               update_log(f"❌ Failed to install {RED}{module}{COLOR_CLS}. Please check manually.")
 
   if RESET_FLAG:
-    update_log(f'🔄 Restarting to apply changes {YELLOW}[Please rerun this cell!]{COLOR_CLS}')
+    update_log(f'🔄 Restarting to apply changes {YELLOW}[{COLOR_CLS}Please rerun this cell!{YELLOW}]{COLOR_CLS}')
     time.sleep(0.5)
     os.kill(os.getpid(), 9)
   else:
@@ -65,4 +65,4 @@ if __name__ == "__main__":
         'autogluon.tabular': None,
         'scikit-learn': '1.4.1',
     }
-    colab_dependencies_setup(requirements)
+    auto_lib_setup(requirements)
