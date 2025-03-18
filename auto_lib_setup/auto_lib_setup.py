@@ -3,20 +3,39 @@ import importlib
 import subprocess
 import sys
 import time
+import IPython
 
 
 RED,GREEN,YELLOW,BLUE,PURPLE = "\033[31m","\033[32m","\033[33m","\033[34m","\033[35m"
 COLOR_CLS = "\033[0m"
 
+
 def auto_lib_setup(dependency_requirements : dict, log_output_dir= '/content/'):
   LOG_PATH = os.path.join(log_output_dir, 'setup_log.txt')
   RESET_FLAG = False
   LOGS = []
+  
   def update_log(log):
     LOGS.append(log)
     print(log)
     with open(LOG_PATH, 'a') as f:
       f.write(log + '\n')
+
+  def restart_colab_runtime():
+    update_log("🔄 Restarting runtime...")
+    time.sleep(2)  
+
+    display(IPython.display.Javascript('''
+        function reconnect() {
+            console.log("🔄 Auto-reconnecting...");
+            document.querySelector("colab-toolbar-button.reconnect-button").click();
+        }
+        setTimeout(reconnect, 3000);
+    '''))
+    update_log(f'🔄 Auto-reconnecting... {YELLOW}[{COLOR_CLS}Once reconnected, rerun this cell to continue.{YELLOW}]{COLOR_CLS}')
+    time.sleep(0.5)
+    os.kill(os.getpid(), 9) 
+
 
   for module, required_version in dependency_requirements.items():
       try:
@@ -49,20 +68,28 @@ def auto_lib_setup(dependency_requirements : dict, log_output_dir= '/content/'):
               update_log(f"❌ Failed to install {RED}{module}{COLOR_CLS}. Please check manually.")
 
   if RESET_FLAG:
-    update_log(f'🔄 Restarting to apply changes {YELLOW}[{COLOR_CLS}Please rerun this cell!{YELLOW}]{COLOR_CLS}')
     time.sleep(0.5)
-    os.kill(os.getpid(), 9)
+    restart_colab_runtime()
   else:
     if os.path.exists(LOG_PATH):
       with open(LOG_PATH, 'r') as f:
         print(f.read())
-      print('='*50)
-    print(f'✅ {GREEN} All dependencies match the required versions. {COLOR_CLS}')
+      print('='*80)
+    
+    print(f'✅ All dependencies match the required versions.')
+    for module, required_version in dependency_requirements.items():
+      current_version = required_version
+      if not required_version:
+        imported_module = importlib.import_module(module)
+        current_version = getattr(imported_module, '__version__', None)
+        current_version = f'{current_version} (latest)'
+
+      print(f'- {PURPLE}{module}{COLOR_CLS} : {GREEN}{current_version}{COLOR_CLS}')
 
 if __name__ == "__main__":
     # Example usage 
     requirements = {
         'autogluon.tabular': None,
-        'scikit-learn': '1.4.1',
+        'numpy': '1.23.5',
     }
     auto_lib_setup(requirements)
