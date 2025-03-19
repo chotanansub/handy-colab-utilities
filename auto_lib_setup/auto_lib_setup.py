@@ -35,7 +35,11 @@ def auto_lib_setup(dependency_requirements : dict, log_output_dir= '/content/'):
     update_log(f'🔄 Auto-reconnecting... {YELLOW}[{COLOR_CLS}Once reconnected, rerun this cell to continue.{YELLOW}]{COLOR_CLS}')
     time.sleep(0.5)
     os.kill(os.getpid(), 9) 
-
+  
+  if not os.path.exists(LOG_PATH):
+    update_log(f'{BLUE}⋆.ೃ࿔*:･🪼 NongMind\'s Auto Dependencies Setup  ･:*࿔ೃ.⋆ {COLOR_CLS}')
+    update_log('='*80)
+    
 
   for module, required_version in dependency_requirements.items():
       try:
@@ -49,7 +53,7 @@ def auto_lib_setup(dependency_requirements : dict, log_output_dir= '/content/'):
               continue 
 
           if required_version and installed_version != required_version:
-              update_log(f"🚀 {PURPLE}{module}{COLOR_CLS} is updating : {installed_version} → {GREEN}{required_version}{COLOR_CLS}")
+              update_log(f"🚀 {PURPLE}{module}{COLOR_CLS} is updating : {RED}{installed_version}{COLOR_CLS} → {GREEN}{required_version}{COLOR_CLS}")
               subprocess.run([sys.executable, "-m", "pip", "install", f"{module}=={required_version}"], check=True)
               RESET_FLAG = True
 
