@@ -53,8 +53,8 @@ def auto_lib_setup(dependency_requirements: dict, log_output_dir='/content/'):
     for module, required_version in dependency_requirements.items():
         try:
             imported_module = importlib.import_module(module)
-            installed_version = getattr(imported_module, '__version__', None)
-
+            installed_version = importlib.metadata.version(module)
+       
             if not installed_version:
                 update_log(f"🚀 {PURPLE}{module}{COLOR_CLS} is installed but version is missing. Reinstalling...")
 
@@ -120,7 +120,7 @@ def auto_lib_setup(dependency_requirements: dict, log_output_dir='/content/'):
             current_version = required_version
             if not required_version:
                 imported_module = importlib.import_module(module)
-                current_version = getattr(imported_module, '__version__', None)
+                current_version = importlib.metadata.version(module)
                 current_version = f'{current_version} (latest)'
 
             print(f'- {PURPLE}{module}{COLOR_CLS} : {GREEN}{current_version}{COLOR_CLS}')
